@@ -1,0 +1,16 @@
+{
+  "name": "clear-user-select",
+  "description": "",
+  "license": "MIT",
+  "author": "",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "yarn prettier && zip -r app.zip src/*",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prettier": "prettier --write src/**/*.{js,json} && prettier-package-json --write package.json"
+  },
+  "devDependencies": {
+    "prettier": "^2.2.1",
+    "prettier-package-json": "^2.1.3"
+  }
+}
