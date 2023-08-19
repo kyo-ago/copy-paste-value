@@ -1,33 +1,54 @@
-chrome.contextMenus.create({
-  id: "copy",
-  title: "copy",
-  contexts: ["all"],
-});
-chrome.contextMenus.create({
-  id: "paste",
-  title: "paste",
-  contexts: ["all"],
-});
+(async () => {
+  await chrome.contextMenus.removeAll();
+  chrome.contextMenus.create({
+    id: "copy",
+    title: "copy",
+    contexts: ["all"],
+  });
+  chrome.contextMenus.create({
+    id: "paste",
+    title: "paste",
+    contexts: ["all"],
+  });
+})();
 
-const copyCommand = (tab) => {
-  chrome.tabs.sendMessage(tab.id, { command: "copy" }, (response) => {
-    const el = document.createElement("textarea");
-    el.value = response.value;
-    document.body.append(el);
-    el.select();
-    document.execCommand("copy");
-    el.remove();
+const copyCommand = async (tab, frameId) => {
+  const response = await chrome.tabs.sendMessage(
+    tab.id,
+    { command: "copy" },
+    {
+      frameId,
+    },
+  );
+  await chrome.offscreen.createDocument({
+    url: "offscreen.html",
+    reasons: [chrome.offscreen.Reason.CLIPBOARD],
+    justification: "Write text to the clipboard.",
+  });
+  chrome.runtime.sendMessage({
+    type: "copy",
+    target: "offscreen-doc",
+    data: response.value,
   });
 };
 
-const pasteCommand = (tab) => {
-  const el = document.createElement("textarea");
-  document.body.append(el);
-  el.select();
-  document.execCommand("paste");
-  const value = el.value;
-  el.remove();
-  chrome.tabs.sendMessage(tab.id, { command: "paste", value: value });
+const pasteCommand = async (tab, frameId) => {
+  await chrome.offscreen.createDocument({
+    url: "offscreen.html",
+    reasons: [chrome.offscreen.Reason.CLIPBOARD],
+    justification: "Copy text from the clipboard.",
+  });
+  const response = await chrome.runtime.sendMessage({
+    type: "paste",
+    target: "offscreen-doc",
+  });
+  chrome.tabs.sendMessage(
+    tab.id,
+    { command: "paste", value: response.value },
+    {
+      frameId,
+    },
+  );
 };
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
@@ -35,9 +56,9 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     return;
   }
   if (info.menuItemId === "copy") {
-    copyCommand(tab);
+    copyCommand(tab, info.frameId);
   }
   if (info.menuItemId === "paste") {
-    pasteCommand(tab);
+    pasteCommand(tab, info.frameId);
   }
 });

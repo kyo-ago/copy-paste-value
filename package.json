@@ -1,16 +1,16 @@
 {
   "name": "copy-paste-value-extension",
+  "version": "0.0.3",
   "description": "",
   "license": "MIT",
   "author": "",
-  "version": "0.0.0",
   "scripts": {
     "build": "yarn prettier && zip -r app.zip src/*",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prettier": "prettier --write src/**/*.{js,json} && prettier-package-json --write package.json"
+    "prettier": "prettier --write src/**/*.{js,json,html} && prettier-package-json --write package.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "prettier": "^2.2.1",
-    "prettier-package-json": "^2.1.3"
+    "prettier": "^3.0.2",
+    "prettier-package-json": "^2.8.0"
   }
 }
